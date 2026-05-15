@@ -51,4 +51,5 @@ dotnet run
 
 Tarayıcınızda terminalin size verdiği adrese (örneğin http://localhost:5xxx) giderek arayüze erişebilirsiniz.
 
+Projeyi çalıştırmak için https://drive.google.com/file/d/1Dxqd3t5ejJRjxMTfuN7_uvJRTszFNnWq/view?usp=sharing linkinden indireceğiniz model.safetensors dosyasını src/fine_tuned_codebert klasörüne eklemeniz gerekir.
 Bu proje, yapay zeka ile modern web teknolojilerinin siber güvenlik alanında nasıl bütünleşik ve kurumsal ölçekte kullanılabileceğini göstermek amacıyla geliştirilmiştir.
