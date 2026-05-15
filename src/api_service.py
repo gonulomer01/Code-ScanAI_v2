@@ -26,7 +26,7 @@ app.add_middleware(
 )
 
 # --- İP-3: GEMINI AYARLARI ---
-GEMINI_API_KEY = "AIzaSyCrDVtjcK0VudeAsehZV-31muhdYIC_XAQ"
+GEMINI_API_KEY = "your_api_key"
 genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 
