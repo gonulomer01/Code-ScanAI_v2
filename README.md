@@ -1,4 +1,4 @@
-# 🛡️ CodeScanAI PRO v4.0 - Hybrid AI Security Scanner
+# 🛡️ CodeScanAI v2.0 - Hybrid AI Security Scanner
 
 CodeScanAI, yazılım geliştirme süreçlerinde kaynak kod zafiyetlerini (vulnerability) tespit etmek ve onarmak için geliştirilmiş, **SSEM (Semantic-Syntactic Embedding Model)** mimarisine ve **Geri Bildirim Döngüsüne (Feedback Loop)** sahip profesyonel bir siber güvenlik aracıdır.
 
