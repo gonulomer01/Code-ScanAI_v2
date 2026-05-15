@@ -1,7 +1,7 @@
 import google.generativeai as genai
 
 # Kendi API Anahtarını buraya yapıştır
-GEMINI_API_KEY = "AIzaSyCrDVtjcK0VudeAsehZV-31muhdYIC_XAQ"
+GEMINI_API_KEY = "your_api_key"
 genai.configure(api_key=GEMINI_API_KEY)
 
 print("🔍 Google'a bağlanılıyor ve modeller listeleniyor...\n")
