@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Gizlilik Politikası";
+}
+
+<style>
+    body { background-color: #121212; color: #e0e0e0; }
+    .privacy-container { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 40px; margin-top: 50px; }
+    h1 { color: #569cd6; }
+    p { color: #dcdcdc; line-height: 1.6; }
+</style>
+
+<div class="container">
+    <div class="privacy-container text-center">
+        <h1>@ViewData["Title"]</h1>
+        <hr style="border-color: #444;">
+        <p class="mt-4">
+            CodeScanAI platformu, TÜBİTAK 2209-A projesi kapsamında akademik araştırma amacıyla geliştirilmiştir. 
+            Yüklenen kodlar sadece analiz ve veritabanı loglama süreçlerinde kullanılmaktadır.
+        </p>
+        <p>Tüm veriler yerel MSSQL sunucusunda güvenli bir şekilde saklanmaktadır.</p>
+        <div class="mt-5">
+            <a asp-action="Index" class="btn btn-outline-primary">Ana Sayfaya Dön</a>
+        </div>
+    </div>
+</div>

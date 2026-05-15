@@ -1,0 +1,5 @@
+id,code,vulnerability_type,label
+1,public void GetUser(string id) { string q = 'SELECT * FROM users WHERE id=' + id; },SQL_Injection,1
+2,public void PrintNum() { for(int i=0; i<10; i++) { Console.WriteLine(i); } },None,0
+3,public void Delete(string file) { File.Delete(file); },Path_Traversal,1
+4,"public int Add(int a, int b) { return a + b; }",None,0

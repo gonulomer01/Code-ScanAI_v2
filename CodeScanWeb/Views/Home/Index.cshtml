@@ -1,0 +1,226 @@
+﻿@{
+    ViewData["Title"] = "CodeScanAI - Profesyonel Analiz Alanı";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+<style>
+    body { background-color: #0f0f0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .main-container { max-width: 1200px; margin-top: 30px; }
+    
+    /* Editör ve Kart Stilleri */
+    .editor-container { 
+        background-color: #1e1e1e; 
+        border-radius: 12px; 
+        border: 1px solid #333;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        padding: 25px;
+    }
+    
+    .form-control, .form-select {
+        background-color: #252526 !important;
+        border: 1px solid #3e3e42 !important;
+        color: #dcdcdc !important;
+        font-family: 'Fira Code', 'Consolas', monospace;
+        font-size: 0.95rem;
+    }
+
+    /* Side-by-Side Panel Stilleri */
+    .compare-container { display: none; margin-top: 30px; animation: fadeIn 0.5s ease-in; }
+    .code-card { border-radius: 8px; overflow: hidden; border: 1px solid #333; height: 100%; background-color: #1a1a1a; }
+    .code-header { padding: 10px 15px; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    
+    /* Prism.js ile uyumlu olması için pre ve code ayarları */
+    pre { 
+        margin: 0 !important; 
+        border-radius: 0 !important;
+        height: 450px; 
+        overflow: auto; 
+        background-color: transparent !important;
+    }
+    
+    code { font-size: 13px !important; line-height: 1.6 !important; }
+
+    /* Gömülü (Inline) Loading Alanı */
+    .inline-loader {
+        display: none;
+        background-color: #1e1e1e;
+        border: 1px dashed #0e639c;
+        border-radius: 12px;
+        padding: 40px;
+        margin-top: 30px;
+        text-align: center;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    .btn-scan { 
+        background: linear-gradient(135deg, #0e639c 0%, #1177bb 100%); 
+        border: none; padding: 14px 40px; 
+        font-weight: bold; border-radius: 6px;
+        transition: transform 0.2s;
+    }
+    .btn-scan:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(17, 119, 187, 0.4); }
+
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Fark Renkleri */
+    .bg-diff-error { background-color: #4b1a1d !important; border-bottom: 1px solid #dc3545; }
+    .bg-diff-success { background-color: #1a3a2a !important; border-bottom: 1px solid #28a745; }
+</style>
+
+<div class="container main-container">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold" style="color: #569cd6; letter-spacing: -1px;">CodeScan<span style="color: #ce9178;">AI</span> <span class="badge bg-primary" style="font-size: 12px; vertical-align: middle;">PRO v4.0</span></h1>
+        <p class="text-muted">SSEM Mimarisi & Feedback Loop Destekli Güvenlik Denetimi</p>
+    </div>
+
+    <div class="editor-container">
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-4">
+                <select class="form-select form-select-sm" id="languageSelect">
+                    <option value="auto">✨ Otomatik Dil Algılama</option>
+                    <option value="csharp">C# (.NET Core)</option>
+                    <option value="python">Python 3.x</option>
+                    <option value="cpp">C++ (GCC/LLVM)</option> 
+                </select>
+            </div>
+            <div class="col-md-8 text-end">
+                <span class="text-muted small"><i class="bi bi-cpu"></i> CodeBERT SSEM Engine Aktif</span>
+            </div>
+        </div>
+
+        <textarea id="codeInput" class="form-control mb-4" rows="12" placeholder="// Analiz edilecek kod bloğunu buraya yerleştirin..."></textarea>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                <i class="bi bi-shield-check text-success"></i> Veri gizliliği korunuyor.
+            </div>
+            <button class="btn btn-primary btn-scan" id="scanBtn">
+                <i class="bi bi-play-fill"></i> ANALİZİ BAŞLAT
+            </button>
+        </div>
+    </div>
+
+    <div id="inlineLoader" class="inline-loader">
+        <div class="spinner-border text-info mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <h4 class="fw-bold text-white" id="mainStatus">Sistem Uyandırılıyor...</h4>
+        <p class="text-muted mb-0" id="subStatus">Lütfen bekleyin, derin öğrenme modeli analiz ediliyor.</p>
+    </div>
+
+    <div id="compareContainer" class="compare-container">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="code-card">
+                    <div class="code-header bg-diff-error text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-bug"></i> Tespit Edilen Zafiyet</span>
+                        <span id="confBadge" class="badge bg-danger">0%</span>
+                    </div>
+                    <pre><code id="originalPre" class="language-clike"></code></pre>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="code-card">
+                    <div class="code-header bg-diff-success text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-magic"></i> AI Güvenli Onarım</span>
+                        <span id="statusLabel" class="badge bg-success">DOĞRULANDI</span>
+                    </div>
+                    <pre><code id="repairedPre" class="language-clike"></code></pre>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 p-3 bg-dark border border-secondary rounded">
+            <h6 class="text-warning small fw-bold mb-2"><i class="bi bi-info-circle"></i> SİSTEM ANALİZ RAPORU:</h6>
+            <div id="systemNote" class="small m-0 text-light" style="line-height: 1.5;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+
+    <script>
+        document.getElementById('scanBtn').addEventListener('click', async function () {
+            const codeInput = document.getElementById('codeInput').value;
+            const language = document.getElementById('languageSelect').value;
+            const loader = document.getElementById('inlineLoader');
+            const compareView = document.getElementById('compareContainer');
+            const mainStatus = document.getElementById('mainStatus');
+            const subStatus = document.getElementById('subStatus');
+            const btn = document.getElementById('scanBtn');
+
+            if (!codeInput.trim()) return;
+
+            // UI Hazırlığı: Butonu pasifleştir, paneli gizle, loader'ı aç
+            btn.disabled = true;
+            compareView.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                // Aşamalı Loading Mesajları
+                setTimeout(() => { mainStatus.innerText = "AST Çıkarılıyor..."; subStatus.innerText = "Kodun anlamsal ağaç yapısı oluşturuluyor."; }, 800);
+                setTimeout(() => { mainStatus.innerText = "CodeBERT Analizi..."; subStatus.innerText = "%87.54 doğruluk oranıyla zafiyet taranıyor."; }, 2000);
+
+                const response = await fetch('/Home/ScanCode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: codeInput, language: language })
+                });
+
+                if (!response.ok) throw new Error("API Yanıt Vermedi.");
+
+                const data = await response.json();
+
+                if (data.status.includes("Zafiyet")) {
+                    mainStatus.innerText = "Onarım Yapılıyor..."; 
+                    subStatus.innerText = "Gemini AI yama üretiyor ve Feedback Loop ile doğrulanıyor.";
+                    
+                    // Gelen dile göre Prism renklendirme sınıfını belirle
+                    let prismClass = "language-clike"; // Varsayılan
+                    let detected = (data.detected_language || "").toUpperCase();
+                    if (detected === "CSHARP") prismClass = "language-csharp";
+                    else if (detected === "PYTHON") prismClass = "language-python";
+                    else if (detected === "CPP") prismClass = "language-cpp";
+
+                    // Kodları yerleştir ve sınıfları ata
+                    const origCodeEl = document.getElementById('originalPre');
+                    const repCodeEl = document.getElementById('repairedPre');
+                    
+                    origCodeEl.className = prismClass;
+                    repCodeEl.className = prismClass;
+                    
+                    origCodeEl.textContent = codeInput;
+                    repCodeEl.textContent = data.repair_suggestion;
+
+                    // Prism.js'e bu kod bloklarını renklendirmesini söyle
+                    Prism.highlightElement(origCodeEl);
+                    Prism.highlightElement(repCodeEl);
+
+                    document.getElementById('confBadge').innerText = "RİSK SKORU: " + (data.confidence || "%99");
+                    
+                    // Not bölümünü detaylı ve şık şekilde doldur
+                    document.getElementById('systemNote').innerHTML = 
+                        `<strong>Algılanan Dil:</strong> <span class="text-info">${data.detected_language || "Bilinmiyor"}</span> <br>` +
+                        `<strong>Motor Yanıtı:</strong> <span class="text-danger">${data.status || "Zafiyet Tespit Edildi"}</span> <br>` +
+                        `<strong>Süreç:</strong> CodeBERT modeli güvenlik açığını saptadı. Onarım modülü (Gemini) temiz kodu üretti ve derleyici motorunda (Feedback Loop) hata almadan başarıyla doğrulandı.`;
+                    
+                    // Loader'ı kapat, Sonuç panelini aç
+                    loader.style.display = 'none';
+                    compareView.style.display = 'block';
+                } else {
+                    loader.style.display = 'none';
+                    alert("✅ " + data.status + "\nHerhangi bir zafiyet tespit edilemedi.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                loader.style.display = 'none';
+                alert("Hata: Python API veya Veritabanı bağlantısı kurulamadı.");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+}

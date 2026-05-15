@@ -1,0 +1,37 @@
+# ==========================================
+# 1. PYTHON & YAPAY ZEKA GİZLİLİK KURALLARI
+# ==========================================
+# Sanal Ortamlar
+venv/
+env/
+.venv/
+
+# Python Önbellek Dosyaları
+__pycache__/
+*.pyc
+src/__pycache__/
+
+# 🚨 AI Model Ağırlıkları (GITHUB'A ASLA YÜKLENMEMELİ - 100MB SINIRI)
+src/fine_tuned_codebert/*.bin
+src/fine_tuned_codebert/*.safetensors
+src/fine_tuned_codebert/*.msgpack
+src/fine_tuned_codebert/*.h5
+
+# ==========================================
+# 2. C# (.NET CORE) GİZLİLİK KURALLARI
+# ==========================================
+# Derleme ve Geçici Dosyalar
+**/bin/
+**/obj/
+*.user
+
+# Geliştirme Ortamı Ayarları (Şifreler vs. burada olabilir)
+appsettings.Development.json
+appsettings.*.json
+
+# ==========================================
+# 3. GENEL SİSTEM & ÇEVRESEL DEĞİŞKENLER
+# ==========================================
+.env
+.DS_Store
+Thumbs.db

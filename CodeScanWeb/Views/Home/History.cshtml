@@ -1,0 +1,116 @@
+@model IEnumerable<CodeScanWeb.Models.ScanResult>
+
+@{
+    ViewData["Title"] = "Tarama Geçmişi";
+}
+
+<style>
+    body { background-color: #121212; color: #e0e0e0; }
+    .history-card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 25px; }
+    .table { color: #dcdcdc; }
+    .modal-content { background-color: #1e1e1e; color: #e0e0e0; border: 1px solid #444; }
+    .modal-header { border-bottom: 1px solid #333; }
+    .modal-footer { border-top: 1px solid #333; }
+    pre { background-color: #252526; color: #9cdcfe; padding: 15px; border-radius: 4px; border: 1px solid #333; white-space: pre-wrap; word-wrap: break-word; }
+</style>
+
+<div class="container mt-5">
+    <div class="history-card">
+        <h2 class="mb-4" style="color: #569cd6;">📊 Tarama Geçmişi</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-dark table-hover border-secondary">
+                <thead>
+                    <tr style="color: #ce9178;">
+                        <th>Tarih</th>
+                        <th>Dil</th>
+                        <th>Durum</th>
+                        <th>Güven</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.ScanDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td><span class="badge bg-dark border border-secondary">@item.DetectedLanguage</span></td>
+                            <td>
+                                <span class="badge @((item.Status ?? "").Contains("Zafiyet") ? "bg-danger" : "bg-success")">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td style="color: #b5cea8;">%@item.ConfidenceScore</td>
+                            <td>
+                                <textarea id="hidden_code_@item.Id" style="display:none;">@item.CodeSnippet</textarea>
+
+                                <button class="btn btn-sm btn-outline-info" onclick="showCodeModal(@item.Id)">
+                                    🔍 Kodu Gör
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteRecord(@item.Id)">
+                                    🗑️ Sil
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary mt-3">⬅ Panele Dön</a>
+    </div>
+</div>
+
+<div class="modal fade" id="codeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tarama Yapılan Kaynak Kod</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="modalCodeContent"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Kodu gösterme fonksiyonumuz artık ID üzerinden gizli textarea'yı okuyacak
+        function showCodeModal(id) {
+            // İlgili satırın gizli textarea'sından kodu çekiyoruz
+            var realCode = document.getElementById("hidden_code_" + id).value;
+            
+            // Modal içindeki alana kodu basıyoruz
+            document.getElementById('modalCodeContent').textContent = realCode;
+            
+            // Modalı ekranda gösteriyoruz
+            var myModal = new bootstrap.Modal(document.getElementById('codeModal'));
+            myModal.show();
+        }
+
+        async function deleteRecord(id) {
+            if (confirm("Bu tarama kaydını kalıcı olarak silmek istediğinize emin misiniz?")) {
+                try {
+                    const response = await fetch(`/Home/DeleteRecord/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        location.reload(); 
+                    } else {
+                        alert("Silme işlemi sırasında bir hata oluştu.");
+                    }
+                } catch (error) {
+                    console.error("Hata:", error);
+                    alert("Sunucuya bağlanılamadı.");
+                }
+            }
+        }
+    </script>
+}
